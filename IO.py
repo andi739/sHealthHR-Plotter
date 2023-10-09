@@ -16,6 +16,11 @@ def __make_base_folder():
 
 
 def get_autoload_filepath():
+    """Reads autoload file and returns the location of the last saved file.
+
+    Returns:
+        string: absolute path of last opened file. empty if none
+    """    
     #check whether program folder in user/documents exists, if not create one.
     base_path = __make_base_folder()
     #check whether autoload file exists and get it's contents
@@ -45,6 +50,7 @@ def load_config():
     base_path = __make_base_folder()
     #TODO |loadCOnfig(Kommt später, Settings mit ConfigParser [.ini format]) 
         #point descr onHover or onClick 
+        #disbable autoload
 
 
 def save_file():#mithilfe von file-explorer

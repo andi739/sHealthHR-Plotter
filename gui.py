@@ -1,16 +1,16 @@
-import tkinter as tk
+import tkinter as tk #TODO set font sizes depending on screen size, etc.
 from tkinter import ttk
 from tkinter import messagebox
 import tkinter as tk
 import matplotlib
-
 matplotlib.use('TkAgg')
-
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg,
     NavigationToolbar2Tk
 )
+
+import IO as io
 
 class MainWindow:
     def __init__(self, window_width = 800, window_height = 400):
@@ -39,12 +39,19 @@ class MainWindow:
         self.__root.iconbitmap('./resources/logo.ico')
     #add top bar
         self.__make_topbar()
-    #TODO checkPrevious() 
-        #entweder if isPrevious(): autoload() else: make_empty_message()
-        #oder die if abfrage in make_autoload, je nachdem wie das funktioniert
-            #ttk.Label(root, text='Load a file or import Samsung Health heart ate data to start a new File').pack()#TODO make this text italic #TODO center text & display only if empty File -> #TODO autoload last opened File 
-        self.__make_main_area()
-        self.__make_side_area()
+    #get path of last opened file
+        autoload_path = io.get_autoload_filepath()
+        if autoload_path:
+            #TODO
+            self.__make_main_area()
+            self.__make_side_area()
+        #display blank page, if there's no path
+        else:
+            self.__blank_label = ttk.Label(self.__root, text='< Load a file or import Samsung Health heart rate data to start a new File >', anchor=tk.CENTER).pack(expand=True)
+            #TODO make this text italic #TODO center text & display only if empty File -> #TODO autoload last opened File
+            # TODO destroy this?! <- use case: blank project -> load file.
+        
+
     '''Idee: Programm erstellt onClose eine (unsichtbare?) Datei in appdata oder so, wo der pfad der zuletzt geöffneten Datei steht 
         und falls möglich nen EXCEPTION flag, wenn das programm alt+f4 'ed wurde.
         Beim start, also hier, wird diese Datei gelesen, und mit dem Pfad das zuletzt geöffnete dokument geladen.
@@ -61,12 +68,12 @@ class MainWindow:
         settings_menu = tk.Menu(master=menubar, tearoff=False)
         help_menu = tk.Menu(master=menubar, tearoff=False)
         #add file_menu entries
-        file_menu.add_command(label='New File From Raw Data')
+        file_menu.add_command(label='New File')
         file_menu.add_command(label='Save File')#TODO save - load df.to_pickle df.read_pickle !? Oder Sqlite?? ->mit extra infos, wie default display, etc. settings. matplot chart realtime generation (solangs nicht 10jahre dauert, da entweder ändern oder während des ladens nen Fenster ...loading...)
             #save file fct beim ersten save einer datei callt save as, sonst save über geg pfad. Über autoload? <-Aufpassen!
         file_menu.add_command(label='Save As')
         file_menu.add_command(label='Load File')
-        file_menu.add_command(label='Add Raw Data To This File')
+        file_menu.add_command(label='Import Data To This File')
         file_menu.add_command(label='Exit', command=self.__on_close)
         #add settings_menu entries
         settings_menu.add_command(label='...', state='disabled') # TODO
@@ -150,16 +157,21 @@ class MainWindow:
         pass
 
     def __on_close(self):
-        result = messagebox.askyesnocancel("Unsaved Changes", "There are unsaved changes. Do you want to save them now?")
-        if result is True:
-            #save changes
+        #Only create box, if there are unsaved changes!
+        if self.is_unsaved_changes:
+            result = messagebox.askyesnocancel("Unsaved Changes", "There are unsaved changes. Do you want to save them now?")
+            if result is True:
+                #save changes
+                self.__root.destroy()
+            elif result is False:
+                #don't save
+                self.__root.destroy()
+            elif result is None:
+                #User clicked Cancel
+                pass
+        else:
             self.__root.destroy()
-        elif result is False:
-            #don't save
-            self.__root.destroy()
-        elif result is None:
-            #User clicked Cancel
-            pass
+
 
     def run(self):
         self.__root.mainloop()
